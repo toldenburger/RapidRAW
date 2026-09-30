@@ -2,7 +2,7 @@ use crate::image_processing::apply_orientation;
 use anyhow::{Result, anyhow};
 use image::{DynamicImage, ImageBuffer, Rgba};
 use rawler::{
-    decoders::{Orientation, RawDecodeParams},
+    decoders::{Decoder, Orientation, RawDecodeParams},
     imgop::develop::{DemosaicAlgorithm, Intermediate, ProcessingStep, RawDevelop},
     rawimage::{RawImage, RawPhotometricInterpretation},
     rawsource::RawSource,
@@ -27,6 +27,26 @@ pub fn develop_raw_image(
         cancel_token,
     )?;
     Ok(apply_orientation(developed_image, orientation))
+}
+
+fn metadata_orientation(decoder: &dyn Decoder, source: &RawSource) -> Result<Orientation> {
+    let metadata = decoder.raw_metadata(source, &RawDecodeParams::default())?;
+    Ok(metadata
+        .exif
+        .orientation
+        .map(Orientation::from_u16)
+        .unwrap_or(Orientation::Normal))
+}
+
+pub fn extract_embedded_preview(file_bytes: &[u8]) -> Option<DynamicImage> {
+    let source = RawSource::new_from_slice(file_bytes);
+    let decoder = rawler::get_decoder(&source).ok()?;
+    let preview = decoder
+        .full_image(&source, &RawDecodeParams::default())
+        .ok()??;
+    let orientation =
+        metadata_orientation(decoder.as_ref(), &source).unwrap_or(Orientation::Normal);
+    Some(apply_orientation(preview, orientation))
 }
 
 fn is_linear_raw_format(raw_image: &RawImage) -> bool {
@@ -130,12 +150,7 @@ fn develop_internal(
     check_cancel()?;
     let mut raw_image: RawImage = decoder.raw_image(&source, &RawDecodeParams::default(), false)?;
 
-    let metadata = decoder.raw_metadata(&source, &RawDecodeParams::default())?;
-    let orientation = metadata
-        .exif
-        .orientation
-        .map(Orientation::from_u16)
-        .unwrap_or(Orientation::Normal);
+    let orientation = metadata_orientation(decoder.as_ref(), &source)?;
 
     let is_linear_format = is_linear_raw_format(&raw_image);
 
