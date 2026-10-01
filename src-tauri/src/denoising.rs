@@ -334,15 +334,18 @@ fn denoise_image(
         )
         .map_err(|e| e.to_string())?
     } else if method == "ai-remote" {
-        let base_url = settings
+        // remote_denoise_address holds the RunPod Serverless endpoint id;
+        // remote_denoise_token holds the RunPod API key.
+        let endpoint_id = settings
             .remote_denoise_address
             .clone()
-            .ok_or_else(|| "Remote denoise server address not configured".to_string())?;
+            .ok_or_else(|| "RunPod serverless endpoint id not configured".to_string())?;
+        let endpoint_url = format!("https://api.runpod.ai/v2/{}", endpoint_id);
         let token = settings.remote_denoise_token.clone();
         tauri::async_runtime::block_on(crate::remote_denoise::run_remote_denoise(
             &rgb_img_for_denoiser,
             intensity,
-            &base_url,
+            &endpoint_url,
             token.as_deref(),
             &app_handle,
         ))
