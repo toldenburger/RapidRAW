@@ -25,6 +25,14 @@ RapidRAW is a modern, high-performance alternative to Adobe Lightroom®. It deli
 
 I started developing this project as a personal challenge when I was 18. My goal was to create a high-performance tool for my own photography workflow while deepening my understanding of React, WGSL and Rust.
 
+---
+
+> **This branch (`remote-ai-denoise-poc`) adds an experimental remote/GPU-accelerated AI denoise mode.** It offloads the AI denoise tiling loop to a user-provided RunPod Serverless endpoint instead of running it locally on CPU (~7x faster in testing). See the [upstream discussion](https://github.com/CyberTimon/RapidRAW/discussions/1814) for the full write-up and benchmark.
+>
+> **Security notes:** credentials are scoped to the minimum needed, not account-wide. The RunPod API key stored in the app is restricted to Read/Write on a single named endpoint only (can't touch other pods, templates, or billing). The GitHub PAT used so RunPod can pull the container image is scoped to `read:packages` only (not `repo` or `write:packages`). Photo data sent for denoising is tile-level float tensors, not full images, and isn't persisted server-side — but it does leave your machine to a third-party GPU host, which is worth knowing before enabling this.
+
+---
+
 <table width="100%">
   <tr>
     <td width="50%" valign="top" align="center">
