@@ -11,7 +11,7 @@ import { listen } from '@tauri-apps/api/event';
 import { invoke } from '@tauri-apps/api/core';
 import { Invokes } from '../ui/AppProperties';
 
-export type DenoiseMethod = 'ai' | 'bm3d' | 'raw9';
+export type DenoiseMethod = 'ai' | 'ai-remote' | 'bm3d' | 'raw9';
 
 const defaultIntensityFor = (m: DenoiseMethod) => (m === 'bm3d' ? 15 : 50);
 
@@ -247,6 +247,7 @@ export default function DenoiseModal({
   const methodOptions = useMemo<Array<{ label: string; value: DenoiseMethod }>>(
     () => [
       { label: t('modals.denoise.methodAi'), value: 'ai' },
+      { label: 'Remote (PoC)', value: 'ai-remote' },
       { label: t('modals.denoise.methodBm3d'), value: 'bm3d' },
       ...(raw9Available ? [{ label: t('modals.denoise.methodRaw9'), value: 'raw9' as const }] : []),
     ],
@@ -515,7 +516,11 @@ export default function DenoiseModal({
           </div>
           <div className="flex-1 max-w-[280px]">
             <Slider
-              label={method === 'ai' ? t('modals.denoise.qualityTileSizeLabel') : t('modals.denoise.strengthLabel')}
+              label={
+                method === 'ai' || method === 'ai-remote'
+                  ? t('modals.denoise.qualityTileSizeLabel')
+                  : t('modals.denoise.strengthLabel')
+              }
               value={intensity}
               min={0}
               max={100}

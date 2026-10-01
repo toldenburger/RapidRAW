@@ -751,11 +751,11 @@ pub async fn get_or_init_lama_model(
 }
 
 #[derive(Clone, Copy)]
-struct TileParams {
-    cs: usize,
-    ucs: usize,
-    overlap: usize,
-    pad: usize,
+pub(crate) struct TileParams {
+    pub(crate) cs: usize,
+    pub(crate) ucs: usize,
+    pub(crate) overlap: usize,
+    pub(crate) pad: usize,
 }
 
 impl TileParams {
@@ -773,7 +773,7 @@ const TILE_BALANCED: TileParams = TileParams::new(504, 480, 6);
 const TILE_FASTER: TileParams = TileParams::new(504, 504, 0);
 const TILE_HIGHER_QUALITY: TileParams = TileParams::new(504, 448, 12);
 
-fn select_tile_params(quality_0_1: f32) -> TileParams {
+pub(crate) fn select_tile_params(quality_0_1: f32) -> TileParams {
     let q = quality_0_1.clamp(0.0, 1.0);
     if q <= 0.25 {
         TILE_FASTER
@@ -795,7 +795,7 @@ fn mirror_coord(c: i32, size: i32) -> i32 {
     }
 }
 
-fn extract_tile_mirror(img: &Rgb32FImage, x0: i32, y0: i32, cs: usize) -> Array4<f32> {
+pub(crate) fn extract_tile_mirror(img: &Rgb32FImage, x0: i32, y0: i32, cs: usize) -> Array4<f32> {
     let (w, h) = (img.width() as i32, img.height() as i32);
     let mut arr = Array4::zeros((1, 3, cs, cs));
     for dy in 0..cs as i32 {
@@ -811,19 +811,19 @@ fn extract_tile_mirror(img: &Rgb32FImage, x0: i32, y0: i32, cs: usize) -> Array4
     arr
 }
 
-struct SeamlessBlend {
-    ud0: usize,
-    ud1: usize,
-    ud2: usize,
-    ud3: usize,
-    absx0: usize,
-    absy0: usize,
-    fswidth: usize,
-    fsheight: usize,
-    overlap: usize,
+pub(crate) struct SeamlessBlend {
+    pub(crate) ud0: usize,
+    pub(crate) ud1: usize,
+    pub(crate) ud2: usize,
+    pub(crate) ud3: usize,
+    pub(crate) absx0: usize,
+    pub(crate) absy0: usize,
+    pub(crate) fswidth: usize,
+    pub(crate) fsheight: usize,
+    pub(crate) overlap: usize,
 }
 
-fn apply_seamless(tile: &mut Array4<f32>, blend: &SeamlessBlend) {
+pub(crate) fn apply_seamless(tile: &mut Array4<f32>, blend: &SeamlessBlend) {
     let SeamlessBlend {
         ud0,
         ud1,
@@ -958,7 +958,7 @@ fn run_native_denoise(
     Ok(())
 }
 
-fn accumulator_to_rgb32f(acc: &[f32], width: u32, height: u32) -> Rgb32FImage {
+pub(crate) fn accumulator_to_rgb32f(acc: &[f32], width: u32, height: u32) -> Rgb32FImage {
     let mut out = Rgb32FImage::new(width, height);
     for (i, p) in out.pixels_mut().enumerate() {
         let i3 = i * 3;

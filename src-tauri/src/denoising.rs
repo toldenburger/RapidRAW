@@ -333,6 +333,20 @@ fn denoise_image(
             &app_handle,
         )
         .map_err(|e| e.to_string())?
+    } else if method == "ai-remote" {
+        let base_url = settings
+            .remote_denoise_address
+            .clone()
+            .ok_or_else(|| "Remote denoise server address not configured".to_string())?;
+        let token = settings.remote_denoise_token.clone();
+        tauri::async_runtime::block_on(crate::remote_denoise::run_remote_denoise(
+            &rgb_img_for_denoiser,
+            intensity,
+            &base_url,
+            token.as_deref(),
+            &app_handle,
+        ))
+        .map_err(|e| e.to_string())?
     } else if method == "raw9" {
         if !is_raw {
             return Err("Apple RAW 9 denoising only works on RAW files.".to_string());

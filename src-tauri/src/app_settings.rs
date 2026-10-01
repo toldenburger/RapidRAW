@@ -475,6 +475,8 @@ pub struct AppSettings {
     pub decorations: Option<bool>,
     #[serde(alias = "comfyuiAddress")]
     pub ai_connector_address: Option<String>,
+    pub remote_denoise_address: Option<String>,
+    pub remote_denoise_token: Option<String>,
     pub last_folder_state: Option<LastFolderState>,
     pub ui_visibility: Option<Value>,
     pub enable_ai_tagging: Option<bool>,
@@ -610,6 +612,8 @@ impl Default for AppSettings {
             font_family: None,
             decorations: Some(false),
             ai_connector_address: None,
+            remote_denoise_address: None,
+            remote_denoise_token: None,
             last_folder_state: None,
             ui_visibility: None,
             enable_ai_tagging: Some(false),

@@ -39,6 +39,7 @@ mod panorama_stitching;
 mod panorama_utils;
 mod preset_converter;
 mod raw_processing;
+mod remote_denoise;
 mod tagging;
 mod tagging_utils;
 mod window_customizer;
